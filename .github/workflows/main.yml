@@ -7,17 +7,10 @@ on:
 jobs:
   test_label_trigger:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Expose labels to env
+      - name: 📌 Print PR label names
         env:
           LABELS: ${{ toJson(github.event.pull_request.labels) }}
         run: |
           echo "📌 라벨 정보:"
-          echo "$LABELS"
-          echo "$LABELS" > labels.json
-
-      - name: Parse labels
-        run: |
-          echo "🔍 labels.json 내용:"
-          cat labels.json
+          echo "$LABELS" | jq -r '.[].name'
