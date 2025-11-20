@@ -8,8 +8,11 @@ jobs:
   test_label_trigger:
     runs-on: ubuntu-latest
     steps:
+      - name: Expose labels to env
+        run: echo "LABELS=${{ toJson(github.event.pull_request.labels) }}" >> $GITHUB_ENV
+
       - name: Check PR Label
         run: |
           echo "🎉 PR 라벨 이벤트 감지됨!"
           echo "전체 라벨 목록:"
-          printf "%s\n" '${{ toJson(github.event.pull_request.labels) }}'
+          echo "$LABELS"
