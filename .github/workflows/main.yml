@@ -2,17 +2,21 @@ name: Label Trigger Test
 
 on:
   pull_request:
-    types: [labeled, unlabeled, opened, synchronize]
+    types: [opened, synchronize, labeled, unlabeled]
 
 jobs:
   test_label_trigger:
     runs-on: ubuntu-latest
+
     steps:
       - name: Expose labels to env
-        run: echo "LABELS=${{ toJson(github.event.pull_request.labels) }}" >> $GITHUB_ENV
-
-      - name: Check PR Label
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels) }}
         run: |
-          echo "🎉 PR 라벨 이벤트 감지됨!"
-          echo "전체 라벨 목록:"
-          echo "$LABELS"
+          echo "📌 라벨 정보:"
+          echo "$LABELS" > labels.json
+
+      - name: Parse labels
+        run: |
+          echo "🔍 labels.json 내용:"
+          cat labels.json
