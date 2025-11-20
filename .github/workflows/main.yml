@@ -7,10 +7,29 @@ on:
 jobs:
   test_label_trigger:
     runs-on: ubuntu-latest
+
     steps:
-      - name: 📌 Print PR label names
+      - name: 📌 PR label 정보 출력
         env:
           LABELS: ${{ toJson(github.event.pull_request.labels) }}
         run: |
-          echo "📌 라벨 정보:"
-          echo "$LABELS" | jq -r '.[].name'
+          # 1. 라벨 한 줄로 정제해서 LABEL_NAMES 로 저장
+          LABEL_NAMES=$(echo "$LABELS" | jq -r 'map(.name) | join(", ")')
+          echo -n "📌 라벨 정보: "
+          echo "$LABEL_NAMES"
+
+          # 2. 다음 스텝에서 사용할 수 있게 저장
+          echo "LABEL_NAMES=$LABEL_NAMES" >> $GITHUB_ENV
+
+      - name: 🎯 라벨 기반 배포 타입 분기 처리
+        run: |
+          echo "🎯 라벨 분기 처리 시작"
+          echo "검출된 라벨: $LABEL_NAMES"
+
+          if echo "$LABEL_NAMES" | grep -qi "Deploy:CodePush"; then
+            echo "🚀 CodePush 배포 라벨 감지됨"
+          elif echo "$LABEL_NAMES" | grep -qi "Deploy:Store"; then
+            echo "📦 Store 배포 라벨 감지됨"
+          else
+            echo "ℹ️ 배포 관련 라벨 없음"
+          fi
